@@ -7,6 +7,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 
 fun getDate(timestamp: Long) = LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneOffset.UTC)
 
@@ -32,9 +33,35 @@ class TrialCommand(
     private val version: String,
 ) : BaseCommand() {
 
+    private fun isTrialOkay(testificate: UUID): Boolean {
+        val trials = trialORE.database.getTrials(testificate)
+        val now = System.currentTimeMillis()
+
+        val recentTrials = trials.map { trialORE.database.getTrialInfo(it) }
+            .filter {
+                val trialTime = it.start.toLong()
+                trialTime >= now - trialORE.config.periodDays * 24 * 60 * 60 * 1000L
+            }
+            .sortedByDescending { it.start }
+
+        if (recentTrials.size >= trialORE.config.countPerPeriod) {
+            return false
+        }
+
+        val mostRecent = recentTrials.firstOrNull()
+        if (mostRecent != null) {
+            val hoursSinceLast = (now - mostRecent.start.toLong()) / (1000 * 60 * 60)
+            if (hoursSinceLast < trialORE.config.minSpacingHours) {
+                return false
+            }
+        }
+
+        return true
+    }
+
     @Default()
     @Subcommand("info")
-    @Description("Information about a TrialORE")
+    @Description("Information about TrialORE")
     fun onInfo(player: Player) {
         player.renderMiniMessage("Current TrialORE version: <gray>$version")
         player.renderMiniMessage("For more details on commands, " +
@@ -72,6 +99,11 @@ class TrialCommand(
                 player.renderMessage(note)
             }
         }
+
+        // Warn of recent trials
+        if (!this.isTrialOkay(testificate)) {
+            player.renderMiniMessage("<yellow>Warning: According to TrialORE settings, this user is ineligible for trial. Check past trials")
+        }
     }
 
     @CommandAlias("trialstart")
@@ -96,6 +128,12 @@ class TrialCommand(
         if (!app.startsWith("https://discourse.openredstone.org/")) {
             throw TrialOreException("Invalid app: $app")
         }
+        
+        // Warn of recent trials
+        if (!this.isTrialOkay(testificate.uniqueId)) {
+            player.renderMiniMessage("<yellow>Warning: According to TrialORE settings, this user is ineligible for trial. Check past trials")
+        }
+
         player.renderMessage("Starting trial of ${testificate.name}")
         testificate.renderMessage("Starting trial with ${player.name}")
         trialORE.startTrial(player.uniqueId, testificate.uniqueId, app)

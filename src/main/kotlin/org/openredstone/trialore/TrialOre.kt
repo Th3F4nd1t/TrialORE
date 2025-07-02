@@ -42,7 +42,10 @@ data class TrialOreConfig(
     val testificateGroup: String = "testificate",
     val builderGroup: String = "builder",
     val webhook: String = "webhook",
-    val abandonForgiveness: Long = 6000
+    val abandonForgiveness: Long = 6000,
+    val countPerPeriod: Int = 2,
+    val periodDays: Int = 7,
+    val minSpacingHours: Int = 24
 )
 
 data class TrialMeta(
