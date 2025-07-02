@@ -40,7 +40,7 @@ class TrialCommand(
         val recentTrials = trials.map { trialORE.database.getTrialInfo(it) }
             .filter {
                 val trialTime = it.start.toLong()
-                trialTime >= now - trialORE.config.periodDays * 24 * 60 * 60 * 1000L
+                trialTime >= now - trialORE.config.periodDays * 24 * 60 * 60L
             }
             .sortedByDescending { it.start }
 
