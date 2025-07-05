@@ -15,6 +15,9 @@ ORE's trial management plugin
 | `/trial note remove [noteId]`      |                                | Remove a trial note (designed to be used with `/trial note list`) |
 | `/trial finish pass`               | `/trialpass`                   | Pass the testificate                                              |
 | `/trial finish fail`               | `/trialfail`                   | Fail the testificate                                              |
+| `/trial automated start`           | `/autotrialstart`              | Start an automated trial                                          |
+| `/trial automated quit`            | `/autotrialquit`               | Exit an automated trial                                           |
+| `/trial automated next`            | `/autotrialnext`               | Move on to the next question in the trial                         |
 
 ## Conducting trials
 
@@ -34,3 +37,6 @@ If a Testificate leaves, they will be demoted to Student and given 5 minutes to 
 If they do not rejoin within those 5 minutes, the trial ends.
 If a trialer leaves, the trial will automatically end in 5 minutes if they do not rejoin, demoting the Testificate to Student.
 The only distinction of an abandoned trial is if the trial ends with an automated abandonment note.
+
+## AutOREmated Trials
+Automated trials are trials in which there is no live testing of the testificate and therefore no requirement of a staff or Engineer being online to run the trial. 
